@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <?php
-require '../utils/brainacheutils.php';
+require 'utils/brainacheutils.php';
 
 use brainache\utils as bu;
 ?>
@@ -15,7 +15,7 @@ use brainache\utils as bu;
     <title>Brainache | Games</title>
     <link rel="stylesheet" href="/css/generic.css">
     <link rel="stylesheet" href="/css/utils/header.css">
-    <link rel="stylesheet" href="css/games.css">
+    <link rel="stylesheet" href="/css/games.css">
 </head>
 
 <body>
