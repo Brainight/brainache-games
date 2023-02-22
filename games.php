@@ -26,7 +26,7 @@ use brainache\utils as bu;
         <div class="brain-content">
             <div class="label underscored">SELECTION OF GAMES</div>
             <ul class="brain-list-nd games-list">
-                <a href="/games/coin.html">
+                <a href="/coin.html">
                     <li class="label game-label">&#129689; COIN OF DESTINY</li>
                 </a>
             </ul>
