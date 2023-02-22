@@ -1,0 +1,29 @@
+.game-label{
+    padding: 5px;
+    transition: 0.2s ease-in;
+    border-radius: 10px;
+}
+
+.game-label:hover{
+    color: red;
+    transition: 0.2s ease-in;
+}
+
+@media screen and (max-width: 1024px){
+    .game-label{
+        margin: 10px 10%;
+        width: 80%;
+        transition: 0.2s ease-out;
+    }
+
+    .game-label:hover{
+        border-radius: 10px;
+        background-color: var(--brain-red-trans);
+        color: black;
+        transition: 0.2s ease-in;
+    }
+
+    .games-list{
+        width: 100%;
+    }
+}

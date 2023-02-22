@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Brainight, 2023-->
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Brainache | Coin Game</title>
+        <link rel="stylesheet" href="/css/generic.css">
+        <link rel="stylesheet" href="/css/utils/brain_modal.css">
+        <link rel="stylesheet" href="/games/css/coin.css">
+    </head>
+    <body class="peace-cursor">
+        <div id="coin-modal-carpet"></div>
+        <div id="select-coin" class="select-coin-div select-coin-hidden">
+            <div id="select-coin-title" class="label"></div>
+            <div class="select-coin-holder">
+                <div class="settings-img-circle-big"><img
+                        class="coin-face-img select-coin-item"
+                        src="/img/brainache_logo_nobg.png" alt=""></div>
+            </div>
+            <div class="select-coin-holder"></div>
+            <div class="settings-img-circle-big"><img
+                    class="coin-face-img select-coin-item"
+                    src="/img/bbrainache_icon.png"
+                    alt=""></div>
+
+            <div class="select-coin-holder">
+                <div class="settings-img-circle-big"><img
+                        class="coin-face-img select-coin-item"
+                        src="/img/sunsquare-logo.png"
+                        alt=""></div>
+            </div>
+            <div class="select-coin-holder">
+                <div class="settings-img-circle-big"><img
+                        class="coin-face-img select-coin-item"
+                        src="/img/4fingevil.png"
+                        alt=""></div>
+            </div>
+            <div class="select-coin-holder">
+                <div class="settings-img-circle-big"><img
+                        class="coin-face-img select-coin-item"
+                        src="/img/4fingpeace.png"
+                        alt=""></div>
+            </div>
+            <div class="select-coin-holder">
+                <div class="settings-img-circle-big"><img
+                        class="coin-face-img select-coin-item"
+                        src="/img/4finpunch.png"
+                        alt=""></div>
+            </div>
+        </div>
+
+        <div class="game-setting-div">
+            <div class="settings-coin-face-holder">
+                <div>
+                    <div id="heads-face" class="settings-coin-face-div"><span
+                            class="label">HEADS</span><span><img
+                                class="settings-img-circle img-heads"
+                                src="/img/brainache_logo_nobg.png" alt=""></span></div>
+                    <div id="tails-face" class="settings-coin-face-div"><span
+                            class="label">TAILS</span><span><img
+                                class="settings-img-circle img-tails"
+                                src="/img/sunsquare-logo.png" alt=""></span></div>
+                </div>
+                <div id="swap-bttn" class="coin-face-swap-div"
+                    onclick="coinFaceHandler.swap()"><img id="swap-icon" class="img-fill"
+                        src="/img/swap-icon.svg" alt=""></div>
+            </div>
+        </div>
+        <div class="left-side-op-div">
+            <div class="exit-icon-div"><a href="/games/games.php"><img
+                        class="img-fill"
+                        src="/img/exit-icon.png" alt=""><span
+                        class="exit-icon-txt">EXIT</span></a></div>
+        </div>
+        <div id="coin-track-holder" class="coin-track-holder">
+            <div id="coin-track" class="coin-track">
+                <div id="coin" class="coin-holder" onclick="rotate()">
+                    <div class="coin-face">
+                        <img class="coin-face-img img-heads" id="heads"
+                            src="/img/brainache_logo_nobg.png" alt="">
+                        <img class="coin-face-img hide img-tails" id="tails"
+                            src="/img/sunsquare-logo.png " alt="">
+                    </div>
+                    <div class="coin-siluete"></div>
+                </div>
+            </div>
+        </div>
+        <div class="line"></div>
+        <span class="label-fill">FLIP THE COIN</span>
+        <script src="js/coin.js"></script>
+    </body>
+</html>

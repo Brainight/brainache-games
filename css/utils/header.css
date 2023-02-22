@@ -1,0 +1,36 @@
+header{
+    width: 100%;
+    overflow: hidden;
+}
+
+.header-holder{
+    border-bottom: 2px solid var(--brain-white);
+    background-color: black;
+    padding: 6px 0px;
+    display: block;
+    position: relative;
+}
+
+.header-logo-holder{
+    width: 128px;
+    margin-left: 100px;
+    align-self: center;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.header-curr-section-title{
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%) rotateZ(-25deg);
+}
+
+@media screen and (max-width: 1024px){
+    .header-logo-holder{
+        width: 128px;
+        margin: auto;
+        align-self: center;
+        display: block;
+    }
+}

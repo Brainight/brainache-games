@@ -1,0 +1,110 @@
+@font-face {
+    font-family: "Permanent Marker";
+    src: url(/fonts/PermanentMarker-Regular.ttf);
+}
+
+:root{
+
+    --bg-full-white: rgb(255,255,255);   
+    --brain-white: rgb(240, 240, 240);
+    --brain-black-gray2: rgba(77, 71, 71, 0.7);
+    --brain-black-gray: rgba(26, 24, 24, 0.7);
+    --brain-redish-black: rgb(27, 10, 10);
+    --brain-red-trans: rgba(240, 0, 0);
+    --color-brainache: rgb(228, 148, 170);
+    --color-brainache-trans: rgb(228, 148, 170, 0.3);
+    --font-marker: "Permanent Marker";
+
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-marker);
+}
+
+
+body{
+    background-color: black;
+}
+
+a{
+    text-decoration: none;
+}
+
+.red{
+    color: red !important;
+    border-color: red !important;
+}
+
+.cbrainache{
+    color: var(--color-brainache) !important;
+    border-color: var(--color-brainache) !important;
+}
+.img-fill{
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.line{
+    width: 100%;
+    border-bottom: 2px solid red;
+    display: block;
+    padding: 5px 0px;
+    background-color: black;;
+}
+
+.label{
+    color: white;
+    font-size: 24px;
+    font-family: "Permanent Marker";
+    margin: auto;
+    display: block;
+    padding: 10px 10px;
+    text-align: center;
+}
+
+.underlined{
+    text-decoration: underline white 2px;
+}
+
+.underscored{
+    border-bottom: 2px solid white;
+}
+
+.label-fill{
+    color: white;
+    font-size: 32px;
+    font-family: "Permanent Marker";
+    margin: auto;
+    display: block;
+    width: 100%;
+    padding: 10px 0px;
+    text-align: center;
+}
+
+.brain-root{
+    height: 100vh;
+    overflow: scroll;
+    background-color: var(--brain-black-gray);
+}
+
+.brain-content{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: scroll;
+}
+
+/* LISTING */
+.brain-list-nd{
+    list-style-type: none;
+    padding: 0;
+}
+
+@media screen and (max-width: 1024px){
+
+}
