@@ -32,7 +32,7 @@ use brainache\utils as bu;
                     <a class="b-label game-label" href="/coin.html">&#129689; COIN OF DESTINY</a>
                 </li>
                 <li>
-                    <a class="b-label game-label" href="/snake.html">&#128013; BRICK SNAKE</a>
+                    <a class="b-label game-label" href="/bricksnake.html">&#128013; BRICK SNAKE</a>
                 </li>
             </ul>
         </div>
