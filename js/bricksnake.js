@@ -29,11 +29,12 @@ function BrickSnakeGame(canvas) {
     this._grow = 0;
 
     this._paused = false;
+    this.isFinished = false;
 
     this._gameLoop = function (time) {
 
-        if(this._paused){
-            window.requestAnimationFrame(() => {this._printPaused();});
+        if (this._paused) {
+            window.requestAnimationFrame(() => { this._printPaused(); });
             return;
         }
 
@@ -51,7 +52,10 @@ function BrickSnakeGame(canvas) {
     }
 
     this._updateObjects = function () {
+        this._moveSnake();
+    }
 
+    this._moveSnake = function () {
         let head = this.snake[0];
         let nextHead;
         let d = 0;
@@ -94,9 +98,6 @@ function BrickSnakeGame(canvas) {
             } else {
                 this.snake.pop();
             }
-
-
-
         }
     }
 
@@ -112,6 +113,9 @@ function BrickSnakeGame(canvas) {
                 idxs.push(i);
                 this._grow++;
                 this._score++;
+                if (this._score % 5 == 0 && this._score < 100) {
+                    this._frameLimit++;
+                }
             }
         }
 
@@ -168,20 +172,28 @@ function BrickSnakeGame(canvas) {
     this._onKeyDown = function (e) {
         switch (e.code) {
             case 'KeyW':
-                this.direction = 0;
+                if (this.direction != 1) {
+                    this.direction = 0;
+                }
                 break;
             case 'KeyS':
-                this.direction = 1;
+                if (this.direction != 0) {
+                    this.direction = 1;
+                }
                 break;
             case 'KeyA':
-                this.direction = 2;
+                if (this.direction != 3) {
+                    this.direction = 2;
+                }
                 break;
             case 'KeyD':
-                this.direction = 3;
+                if (this.direction != 2) {
+                    this.direction = 3;
+                }
                 break;
             case 'KeyP':
                 this._paused = !this._paused;
-                if(!this._paused){
+                if (!this._paused) {
                     this._gameLoop();
                 }
                 break;
@@ -189,8 +201,16 @@ function BrickSnakeGame(canvas) {
     }
 
     this.load = function () {
-        this._canvas.width = 720;
-        this._canvas.height = 540;
+        var width = window.innerWidth
+            || document.documentElement.clientWidth
+            || document.body.clientWidth;
+
+        var height = window.innerHeight
+            || document.documentElement.clientHeight
+            || document.body.clientHeight;
+
+        this._canvas.width = width > 720 ? 720 : width - 20;
+        this._canvas.height = height > 540 ? 540 : height / 2;
 
         this.ctx = this._canvas.getContext('2d');
         this.snake = [
@@ -222,20 +242,20 @@ function BrickSnakeGame(canvas) {
         window.requestAnimationFrame((t) => { this._gameLoop(t) });
     }
 
-    this._printPaused = function(){
+    this._printPaused = function () {
         this._ctx.clearRect(0, 0, canvas.width, canvas.height);
         this._ctx.font = "48px monospace";
         let p = 'PAUSED';
         let t = this._ctx.measureText(p);
         this._ctx.strokeStyle = "white";
         this._ctx.strokeText(p, this._canvas.width / 2 - t.width / 2,
-         this._canvas.height / 2 - 12);
+            this._canvas.height / 2 - 12);
     }
 
     this.printInstructions = function () {
         let pc = 'PC';
         let pcControls = 'UP = W | DOWN = S | LEFT = A | RIGHT = S';
-        let pcControls2 = 'PAUSE = P | ';
+        let pcControls2 = 'PAUSE = P';
         let phone = "PHONE/TABLET";
         let phoneControls = 'Non Existent Yet'
 
@@ -253,6 +273,10 @@ function BrickSnakeGame(canvas) {
         txt = this._ctx.measureText(pcControls)
         this._ctx.strokeText(pcControls, this._canvas.width / 2 - txt.width / 2, 186);
 
+        this._ctx.font = "20px monospace";
+        txt = this._ctx.measureText(pcControls2)
+        this._ctx.strokeText(pcControls2, this._canvas.width / 2 - txt.width / 2, 212);
+
         txt = this._ctx.measureText(phoneControls)
         this._ctx.strokeText(phoneControls, this._canvas.width / 2 - txt.width / 2, 416);
     }
@@ -261,7 +285,9 @@ function BrickSnakeGame(canvas) {
 let startbttn = document.querySelector('#bricksnake-start');
 let bsg = new BrickSnakeGame(document.querySelector('#snake-canvas'));
 startbttn.addEventListener('click', () => {
-    bsg.load();
+    if (bsg.isFinished) {
+        bsg = new BrickSnakeGame(document.querySelector('#snake-canvas'));
+    }
     bsg.start();
     startbttn.style.display = "none";
 });
