@@ -1,0 +1,18 @@
+#snake-canvas{
+    background-color: #0d0e0f;
+}
+
+#snake-paint-img{
+    position: absolute;
+    display: block;
+    top: 0; 
+    left: 0;
+    transform: translate(-20%, -30%);
+    width: 520px;
+}
+
+#game-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

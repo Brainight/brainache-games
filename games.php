@@ -13,7 +13,7 @@ use brainache\utils as bu;
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brainache | Games</title>
-    <link rel="stylesheet" href="/bwu/css/generic.css">
+    <link rel="stylesheet" href="/css/generic.css">
     <link rel="stylesheet" href="/css/utils/header.css">
     <link rel="stylesheet" href="/css/games.css">
 </head>
@@ -24,11 +24,16 @@ use brainache\utils as bu;
         bu\printHeader("GAMES");
         ?>
         <div class="brain-content">
-            <div class="label underscored">SELECTION OF GAMES</div>
+            <div>
+                <h2 class="b-label b-underscored" style="width: 50%" ;>SELECTION OF GAMES</h2>
+            </div>
             <ul class="brain-list-nd games-list">
-                <a href="/coin.html">
-                    <li class="label game-label">&#129689; COIN OF DESTINY</li>
-                </a>
+                <li>
+                    <a class="b-label game-label" href="/coin.html">&#129689; COIN OF DESTINY</a>
+                </li>
+                <li>
+                    <a class="b-label game-label" href="/snake.html">&#128013; BRICK SNAKE</a>
+                </li>
             </ul>
         </div>
 

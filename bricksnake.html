@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainache | Snake</title>
+    <link rel="stylesheet" href="/css/generic.css">
+    <link rel="stylesheet" href="/css/bricksnake.css">
+</head>
+
+<body>
+    <div class="b-brain-root b-brain-content-flex-centered">
+        <div class="left-side-op-div">
+            <div class="exit-icon-div"><a href="/games.php"><img class="b-img-fill" src="/img/exit-icon.png" alt=""><span
+                        class="exit-icon-txt">EXIT</span></a></div>
+        </div>
+        <div style="position: relative;">
+            <img id="snake-paint-img" src="/img/snake/snake_paint.png" alt="">
+            <div id="game-container" class="">
+                <span id="bricksnake-start" class="b-label span-framed-button b-abs-centered">START</span>
+                <canvas id="snake-canvas" width="540" height="420"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/bricksnake.js"></script>
+</body>
+
+</html>

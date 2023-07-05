@@ -1,29 +1,34 @@
-.game-label{
-    padding: 5px;
+.game-label {
+    padding: 2px;
     transition: 0.2s ease-in;
     border-radius: 10px;
 }
 
-.game-label:hover{
-    color: red;
+.game-label:hover {
+    color: rgb(209, 20, 20);
     transition: 0.2s ease-in;
 }
 
-@media screen and (max-width: 1024px){
-    .game-label{
+.game-list{
+    padding: 4px;
+}
+
+
+@media screen and (max-width: 1024px) {
+    .game-label {
         margin: 10px 10%;
         width: 80%;
         transition: 0.2s ease-out;
     }
 
-    .game-label:hover{
+    .game-label:hover {
         border-radius: 10px;
         background-color: var(--brain-red-trans);
         color: black;
         transition: 0.2s ease-in;
     }
 
-    .games-list{
+    .games-list {
         width: 100%;
     }
 }
