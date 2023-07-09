@@ -7,10 +7,15 @@ function BrickSnakeGame(canvas) {
     const GRANADE = 0x4;
     const GRANADE_SEED = 0x5;
     const BOMB = 0x6;
+    const BOMB_FRAG = 0x7;
 
 
     const BOMB_GRAY = '#8e7d7d';
     const ROPE = '#bd712e';
+
+    const AN_DEFAULT = 0x0;
+    const AN_BOMB = 0x1;
+    const AN_GRANADE = 0x2;
 
     const SNAKE_BLOCK_SIZE = 10;
     const SNAKE_FILL_COLOR = '#00ff00';
@@ -101,13 +106,15 @@ function BrickSnakeGame(canvas) {
                 let txt = Math.floor(this.timeToExplode);
                 let txtInfo = ctx.measureText(txt);
                 ctx.fillText(txt, this.x - txtInfo.width / 2, this.y);
-                ctx.fillStyle = BOMB_GRAY;
             }
 
 
         }
 
         bomb.update = function (t) {
+            if (this.immune) {
+                this.fillcolor = BOMB_GRAY;
+            }
             if (this.isTriggered) {
                 let time = this.timeToExplode - t;
                 if (time < 0) {
@@ -147,33 +154,39 @@ function BrickSnakeGame(canvas) {
     }
 
     let Animation = function (duration = 5) {
+        this.type = AN_DEFAULT;
         this.duration = duration;
         this.passedTime = 0;
-        this._isFinished = false;
+        this._finished = false;
         this._onEndCallbacks = [];
-
     }
 
     Animation.prototype.draw = function (ctx, args) { };
+
     Animation.prototype._update = function (time) {
-        if(this._isFinished){
+        if (this._finished) {
             return;
         }
         this.passedTime += time;
         if (this.passedTime >= this.duration) {
-            this._isFinished = true;
+            this._finished = true;
             this._doEnd();
         }
     };
+
     Animation.prototype.update = function (time) {
         this._update(time);
     };
+
+    Animation.prototype.getCollisionableBlocks = function () {
+        return [];
+    }
 
     /*
     * The instance of this animation is passed as an argument to the function
     */
     Animation.prototype.addOnEndCallback = function (f) {
-        if (this._isFinished) {
+        if (this._finished) {
             f(this);
         } else {
             this._onEndCallbacks.push(f);
@@ -181,36 +194,48 @@ function BrickSnakeGame(canvas) {
     }
 
     Animation.prototype._doEnd = function () {
-        this._isFinished = true;
+        this._finished = true;
         for (var f of this._onEndCallbacks) {
             f(this);
         }
     }
 
-    let GranadeAnimation = function (granade, seeds = []) {
-        let animation = new Animation(15);
+    let GranadeAnimation = function (granade) {
+        let animation = new Animation(10);
+        animation.type = AN_GRANADE;
         animation.granade = granade;
-        animation.seeds = seeds;
+        animation.seeds = [];
         animation._time = 0;
         animation.blinkInterval = 0.5;
         animation.granadeAnimationState = false;
         animation._immuneTime = 2;
 
-        for (let seed of seeds) {
+        for (let i = 0; i < 200; i++) {
+            let s = new GranadeSeedBlock(granade.x, granade.y)
             let r = Math.random() < 0.5;
-            seed.vx = (Math.random() * 40) * ((Math.random() < 0.5) ? 1 : -1);
-            seed.vy = (Math.random() * 40) * ((Math.random() < 0.5) ? 1 : -1);
-            if (Math.abs(seed.vx) + Math.abs(seed.vy) < 15) {
-                seed.vx += 10;
-                seed.vy += 10;
+            s.vx = (Math.random() * 40) * ((Math.random() < 0.5) ? 1 : -1);
+            s.vy = (Math.random() * 40) * ((Math.random() < 0.5) ? 1 : -1);
+            if (Math.abs(s.vx) + Math.abs(s.vy) < 15) {
+                s.vx += 10;
+                s.vy += 10;
             }
-            seed.immune = true;
-            seed.fillColor = (r) ? GRANADE_FILL_COLOR : GRANADE_STROKE_COLOR;
-            seed.strokeColor = (r) ? GRANADE_STROKE_COLOR : GRANADE_FILL_COLOR;
+            s.immune = true;
+            s.fillColor = (r) ? GRANADE_FILL_COLOR : GRANADE_STROKE_COLOR;
+            s.strokeColor = (r) ? GRANADE_STROKE_COLOR : GRANADE_FILL_COLOR;
+            animation.seeds.push(s);
+        }
+
+        animation.draw = function (ctx) {
+            this.granade.draw(ctx);
+            this.seeds.forEach(s => s.draw(ctx));
+        }
+
+        animation.getCollisionableBlocks = function () {
+            return this.seeds;
         }
 
         animation.update = function (time) {
-            if (this._isFinished) {
+            if (this._finished) {
                 return;
             }
 
@@ -237,12 +262,12 @@ function BrickSnakeGame(canvas) {
             let seed;
             let immune = animation._immuneTime > 0;
             for (let i = animation.seeds.length - 1; i > 0; i--) {
-                seed = seeds[i];
+                seed = animation.seeds[i];
                 if (!immune) {
                     seed.immune = false;
                 }
                 if (seed.remove) {
-                    seeds.splice(i, 1);
+                    animation.seeds.splice(i, 1);
                     continue;
                 }
                 seed.x += time * seed.vx;
@@ -258,28 +283,40 @@ function BrickSnakeGame(canvas) {
         return animation;
     }
 
-    let ExplosionAnimation = function (bomb, tiktak = 5, explosionTime = 5) {
-        let animation = new Animation(10);
-        animation.duration = tiktak + explosionTime;
+    let FadeOutAnimation = function (elements = [], time) {
+        let a = new Animation(time);
+        a.elements = elements;
+
+    }
+
+    let ExplosionAnimation = function (bomb, tiktak = 3) {
+
+        let animation = new Animation(tiktak + 7);
+        animation.type = AN_BOMB;
         animation.bomb = bomb;
+        bomb.timeToExplode = tiktak;
         animation.particles = [];
         animation.colors = ['#ff0000', '#ff4f08', '#ff9208', '#ffe108', '#ffec08', '#615952']
 
-        let sx, sy;
-        for (let i = 0, c = 0, x = 0; i < 500;
-            i++, (i >= 500 / animation.colors.length * (c + 1)) ? c++ : c, x = Math.floor(i / 100)) {
-            let p = new Block(bomb.x, bomb.y, 5, 5, animation.colors[c], animation.colors[c]);
-            sx = (Math.random() < 0.5) ? 1 : -1;
-            sy = (Math.random() < 0.5) ? 1 : -1;
-            p.vx = Math.random() * 100 * sx;
-            p.vy = Math.random() * 100 * sy;
-            p.ax = (1 + x * 6) * sx;
-            p.ay = (1 + x * 6) * sy;
-            animation.particles.push(p);
+        let sx, sy, r;
+        for (let i = 0; i < 6; i++) {
+            sx = (i == 1 || i == 3) ? 1 : -1;
+            sy = (i == 0 || i == 1) ? 1 : -1;
+            r = Math.random();
+            for (let j = 0; j < animation.colors.length; j++) {
+                let p = new Block(bomb.x, bomb.y, 40, 40, animation.colors[j], animation.colors[j]);
+                p.type = BOMB_FRAG;
+                p.immune = true;
+                p.vx = 120 * r * sx;
+                p.vy = 120 * (1 - r) * sy;
+                p.ax = (22 * j + 10) * r * sx;
+                p.ay = (22 * j + 10) * (1 - r) * sy;
+                animation.particles.push(p);
+            }
         }
 
         animation.update = function (time) {
-            if (this._isFinished) {
+            if (this._finished) {
                 return;
             }
             this._update(time);
@@ -287,15 +324,20 @@ function BrickSnakeGame(canvas) {
             if (this.bomb.isExploded) {
                 let tsquarediv2 = Math.pow(time, 2);
                 for (var p of this.particles) {
+                    p.immune = false;
                     p.x += p.vx * time + p.ax * tsquarediv2;
                     p.y += p.vy * time + p.ay * tsquarediv2;
                 }
             }
         }
 
+        animation.getCollisionableBlocks = function () {
+            return this.particles;
+        }
+
         animation.draw = function (ctx, args) {
+            this.bomb.draw(ctx);
             if (this.bomb.isExploded) {
-                console.log(this.particles);
                 this.particles.forEach(p => {
                     p.draw(ctx);
                 });
@@ -318,7 +360,7 @@ function BrickSnakeGame(canvas) {
     this._grow = 0;
     this._foodEaten = [];
     this._paused = false;
-    this.isFinished = false;
+    this._finished = false;
     this._animations = [];
 
     this._gameLoop = function (time) {
@@ -328,7 +370,7 @@ function BrickSnakeGame(canvas) {
             return;
         }
 
-        if (this._isFinished) {
+        if (this._finished) {
             let startbttn = document.querySelector('#bricksnake-start');
             startbttn.style.display = 'block';
             return;
@@ -349,7 +391,7 @@ function BrickSnakeGame(canvas) {
 
     this._updateObjects = function (t) {
         this._moveSnake();
-        this._handleEatenBlocks();
+        this._handleEatenBlocksDisplay();
         this._updateAnimations(t);
     }
 
@@ -403,7 +445,7 @@ function BrickSnakeGame(canvas) {
         }
     }
 
-    this._handleEatenBlocks = function () {
+    this._handleEatenBlocksDisplay = function () {
         let consumed = false;
 
         for (let i = 0; i < this.snake.length; i++) {
@@ -445,18 +487,15 @@ function BrickSnakeGame(canvas) {
 
         for (let i = 0; i < this.fruits.length; i++) {
             fruit = this.fruits[i];
-            let dx = Math.abs(head.x - fruit.x);
-            let dy = Math.abs(head.y - fruit.y);
-            let d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-            let minDx = head.width / 2 + fruit.width / 2;
-            let minDy = head.height / 2 + fruit.height / 2;
-            if (d < minDx && d < minDy) {
+            let d = this._getBlocksDistance(head, fruit);
+            let ds = this.getMaxCollideDistance(head, fruit);
+            if (d < ds.dx && d < ds.dy) {
                 if (fruit.immune) {
                     continue;
                 }
-                idxs.push({ fruit: fruit, i: i });
+                idxs.push({ block: fruit, i: i });
             } else if (fruit.type === BOMB && d < 60) {
-                if(!fruit.isTriggered){
+                if (!fruit.isTriggered) {
                     fruit.trigger();
                     this._startExplosionAnimation(fruit);
                 }
@@ -464,47 +503,119 @@ function BrickSnakeGame(canvas) {
             }
         }
 
+        // Check collisiosn with animations
+        for (let a of this._animations) {
+            let blocks = a.getCollisionableBlocks();
+            for (let i = blocks.length - 1; i >= 0; i--) {
+                let d = this._getBlocksDistance(head, blocks[i]);
+                let ds = this.getMaxCollideDistance(head, fruit);
+                if (d < ds.dx && d < ds.dy) {
+                    if (blocks[i].immune) {
+                        continue;
+                    }
+                    idxs.push({ block: blocks[i], i: i, animation: a });
+                }
+            }
+        }
+
+        this._handleHeadCollisions(idxs);
+
+        an = [];
+        for (let a of this._animations) {
+            if (a.type === AN_BOMB) {
+                an.push(a);
+            }
+        }
+        // Snake collisions with itself and other objects (no head).
+        let cont = true;
+        for (let i = this.snake.length - 1; i > 2 ; i--) {
+
+            let d = this._getBlocksDistance(head, this.snake[i]);
+            if (d < head.width) {
+                this._finished = true;
+            }
+
+            // Check if bomb fragments are colliding with snake.
+            for (let a of an) {
+                let abs = a.getCollisionableBlocks();
+                for (let b of abs) {
+                    let d = this._getBlocksDistance(b, this.snake[i]);
+                    let ds = this.getMaxCollideDistance(head, fruit);
+                    if (d < ds.dx && d < ds.dy) {
+                        let r = this.snake.splice(i, this.snake.length);
+                        this._score = (this.score > r.length) ? this.score - r.length : 0;
+                        cont = false;
+                        break;
+                    }
+                    if (!cont) {
+                        cont = true;
+                        break;
+                    }
+                }
+            }
+
+        }
+    }
+
+    this.getMaxCollideDistance = function (b0, b1) {
+        let minDx = b0.width / 2 + b1.width / 2;
+        let minDy = b0.height / 2 + b1.height / 2;
+        return { dx: minDx, dy: minDy };
+    }
+
+    this._getBlocksDistance = function (b0, b1) {
+        let dx = Math.abs(b0.x - b1.x);
+        let dy = Math.abs(b0.y - b1.y);
+        let d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        return d;
+    }
+
+    this._handleHeadCollisions = function (idxs) {
         // Process eaten fruits
-        for (var idx of idxs) {
-            switch (idx.fruit.type) {
+        for (let i = idxs.length - 1; i >= 0; i--) {
+            switch (idxs[i].block.type) {
                 case APPLE:
                     this._score++;
                     this._generateFruit();
                     this._foodEaten.push(0);
                     this._frameLimit += 0.2
-                    this.fruits.splice(idx.i, 1);
+                    this.fruits.splice(idxs[i].i, 1);
                     break;
                 case PINEAPPLE:
+                    this._score += 2;
+                    this._foodEaten.push(0);
+                    this._foodEaten.push(1);
+                    this._frameLimit++; // This will havce no effect at some point depending on clients refresh rate.
+                    this.fruits.splice(idxs[i].i, 1);
+                    break;
+                case GRANADE:
                     this._score += 5;
                     this._foodEaten.push(0);
                     this._foodEaten.push(1);
                     this._frameLimit++; // This will havce no effect at some point depending on clients refresh rate.
-                    this.fruits.splice(idx.i, 1);
-                    break;
-                case GRANADE:
-                    this._score += 10;
-                    this._foodEaten.push(0);
-                    this._foodEaten.push(1);
-                    this._frameLimit++; // This will havce no effect at some point depending on clients refresh rate.
-                    this._startGranadeAnimation(idx.fruit);
+                    this._startGranadeAnimation(idxs[i].block);
+                    this.fruits.splice(idxs[i].i, 1);
                     break;
                 case GRANADE_SEED:
-                    this._score += 2;
+                    this._score += 0.5;
                     this._foodEaten.push(0);
-                    idx.fruit.remove = true;
-                    this.fruits.splice(idx.i, 1);
+                    idxs[i].block.remove = true;
+                    idxs[i].animation.getCollisionableBlocks().splice(idxs[i].i, 1);
                     break;
                 case BOMB:
+                    this.fruits.splice(idxs[i].i, 1);
+                    idxs[i].block.immune = true;
+                case BOMB_FRAG:
+                    if (this.snake.length == 2) {
+                        this._finished = true;
+                        return;
+                    }
+                    this.snake.splice(2, this.snake.length);
+                    this._score = (this.score > this.snake.length) ? this.score - this.snake.length : 0;
                     break;
-                default:
-                    this._score++;
-                    this._foodEaten.push(0);
-                    this._frameLimit += 0.2
-                    this.fruits.splice(idx.i, 1);
-                    break;
+
             }
         }
-
         if (idxs.length >= 1 && this._score % 10 == 0) {
             this._generateFruit(1, PINEAPPLE);
         }
@@ -513,25 +624,24 @@ function BrickSnakeGame(canvas) {
             this._generateFruit(1, GRANADE);
         }
 
-        // Snake collisions with itself
-        for (let i = 3; i < this.snake.length; i++) {
-            let dx = Math.abs(head.x - this.snake[i].x);
-            let dy = Math.abs(head.y - this.snake[i].y);
-            let d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-            if (d < head.width) {
-                this._isFinished = true;
-            }
+        let a = Math.random();
+        if (idxs.length >= 1 && a <= 0.1) {
+            this._generateFruit(1, BOMB);
+        }
+        if (idxs.length >= 1 && a <= 0.02) {
+            this._generateFruit(1, GRANADE);
         }
     }
 
     this._startExplosionAnimation = function (bomb) {
         let bombAnimation = new ExplosionAnimation(bomb);
         bombAnimation.addOnEndCallback((a) => {
-            // Remove bomb from fruits
-            for (let i = 0; i < this.fruits.length; i++) {
-                if (this.fruits[i] === a.bomb) {
-                    this.fruits.splice(i, 1);
-                    break;
+            if (!a.bomb.immune) {
+                for (let i = 0; i < this.fruits.length; i++) {
+                    if (this.fruits[i] === bombAnimation.bomb) {
+                        this.fruits.splice(i, 1);
+                        break;
+                    }
                 }
             }
             this._removeAnimation(a);
@@ -540,31 +650,10 @@ function BrickSnakeGame(canvas) {
     }
 
     this._startGranadeAnimation = function (granade) {
-        let seeds = [];
         granade.immune = true;
-        for (let i = 0; i < 200; i++) {
-            let g = new GranadeSeedBlock(granade.x, granade.y)
-            seeds.push(g);
-            this.fruits.push(g);
-        }
 
-        let ga = new GranadeAnimation(granade, seeds);
+        let ga = new GranadeAnimation(granade);
         ga.addOnEndCallback((a) => {
-            let fruit;
-            for (let i = this.fruits.length - 1; i >= 0; i--) {
-                fruit = this.fruits[i];
-                if (fruit === a.granade) {
-                    this.fruits.splice(i, 1);
-                    continue;
-                }
-                for (let j = a.seeds.length - 1; j >= 0; j--) {
-                    if (fruit === a.seeds[j]) {
-                        this.fruits.splice(i, 1);
-                        a.seeds.splice(j, 1);
-                        break;
-                    }
-                }
-            }
             this._removeAnimation(a);
         });
         this._animations.push(ga);
@@ -658,7 +747,7 @@ function BrickSnakeGame(canvas) {
             new SnakeBlock(200, 200),
             new SnakeBlock(200, 210)];
 
-        //this._generateFruit(3);
+        this._generateFruit(3);
         this._generateFruit(1, GRANADE);
         this._generateFruit(1, BOMB);
 
@@ -744,7 +833,7 @@ function BrickSnakeGame(canvas) {
 let startbttn = document.querySelector('#bricksnake-start');
 let bsg = new BrickSnakeGame(document.querySelector('#snake-canvas'));
 startbttn.addEventListener('click', () => {
-    if (bsg._isFinished) {
+    if (bsg._finished) {
         bsg = new BrickSnakeGame(document.querySelector('#snake-canvas'));
     }
     bsg.start();
