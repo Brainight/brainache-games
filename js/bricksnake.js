@@ -528,7 +528,7 @@ function BrickSnakeGame(canvas) {
         }
         // Snake collisions with itself and other objects (no head).
         let cont = true;
-        for (let i = this.snake.length - 1; i > 2 ; i--) {
+        for (let i = this.snake.length - 1; i > 2; i--) {
 
             let d = this._getBlocksDistance(head, this.snake[i]);
             if (d < head.width) {
@@ -542,15 +542,15 @@ function BrickSnakeGame(canvas) {
                     let d = this._getBlocksDistance(b, this.snake[i]);
                     let ds = this.getMaxCollideDistance(head, fruit);
                     if (d < ds.dx && d < ds.dy) {
-                        let r = this.snake.splice(i, this.snake.length);
-                        this._score = (this.score > r.length) ? this.score - r.length : 0;
+                        let r = this.snake.splice(i + 1, this.snake.length - i);
+                        this._score = (this._score > r.length) ? this._score - r.length : 0;
                         cont = false;
                         break;
                     }
-                    if (!cont) {
-                        cont = true;
-                        break;
-                    }
+                }
+                if (!cont) {
+                    cont = true;
+                    break;
                 }
             }
 
@@ -611,7 +611,7 @@ function BrickSnakeGame(canvas) {
                         return;
                     }
                     this.snake.splice(2, this.snake.length);
-                    this._score = (this.score > this.snake.length) ? this.score - this.snake.length : 0;
+                    this._score = (this._score > this.snake.length) ? this._score - this.snake.length : 0;
                     break;
 
             }
@@ -625,10 +625,10 @@ function BrickSnakeGame(canvas) {
         }
 
         let a = Math.random();
-        if (idxs.length >= 1 && a <= 0.1) {
+        if (idxs.length >= 1 && a <= 0.05) {
             this._generateFruit(1, BOMB);
         }
-        if (idxs.length >= 1 && a <= 0.02) {
+        if (idxs.length >= 1 && a <= 0.01) {
             this._generateFruit(1, GRANADE);
         }
     }
