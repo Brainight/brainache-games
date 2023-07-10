@@ -322,7 +322,7 @@ function BrickSnakeGame(canvas) {
             this._update(time);
             this.bomb.update(time);
             if (this.bomb.isExploded) {
-                let tsquarediv2 = Math.pow(time, 2);
+                let tsquarediv2 = Math.pow(time, 2)/2;
                 for (var p of this.particles) {
                     p.immune = false;
                     p.x += p.vx * time + p.ax * tsquarediv2;
