@@ -455,9 +455,11 @@ let PingPong = function () {
 
     this._checkBallCollisions = function () {
         if (this.ball.y <= 2) {
+            this.ball.y = 3;
             this.ball.ay = -this.ball.ay;
             this.ball.vy = -this.ball.vy;
         } else if (this.ball.y >= PPConstants.FIELD_HEIGHT - 2) {
+            this.ball.y = PPConstants.FIELD_HEIGHT - 3;
             this.ball.ay = -this.ball.ay;
             this.ball.vy = -this.ball.vy;
         }
