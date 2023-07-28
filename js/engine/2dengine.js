@@ -19,9 +19,12 @@ const Games2D = {
             this._ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
             // Draw Field
-            this._ctx.fillStyle = "gray";
-            this._ctx.fillRect(0, 0, this.canvas.width, 5);
-            this._ctx.fillRect(0, this.canvas.height - 5, this.canvas.width, 5);
+            this._ctx.fillStyle = "white";
+            this._ctx.fillRect(0, 0, this.canvas.width, 2);
+            this._ctx.fillRect(0, this.canvas.height - 2, this.canvas.width, 2);
+            this._ctx.fillRect(0, 0, 2, this.canvas.height);
+            this._ctx.fillRect(0, this.canvas.height - 2, this.canvas.width, 2);
+            this._ctx.fillRect(this.canvas.width - 2, 0, 2, this.canvas.height);
 
             // Draw objects
             let blocks = data.objects.blocks !== undefined ? data.objects.blocks : [];
