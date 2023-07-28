@@ -3,7 +3,7 @@ const PPConstants = {
     FIELD_WIDTH: 1080,
     FIELD_HEIGHT: 540,
 
-    PAD_HEIGHT: 60,
+    PAD_HEIGHT: 90,
     PAD_WIDTH: 5,
     PAD_DEF_ACC: 400,
 
@@ -144,11 +144,11 @@ let GameObject = function (x = 0, y = 0) {
         } else {
             this.vx = this.vx + this.ax * t;
             this.vy = this.vy + this.ay * t;
-            if (this.vx > this.maxVx) {
-                this.vx = this.maxVx;
+            if (Math.abs(this.vx) > this.maxVx) {
+                this.vx = this.vx / Math.abs(this.vx) * this.maxVx;
             }
             if (Math.abs(this.vy) > this.maxVy) {
-                this.vy = this.maxVy;
+                this.vy = this.vy / Math.abs(this.vy) * this.maxVy;
             }
         }
 
@@ -407,10 +407,10 @@ let PingPong = function () {
             return;
         }
 
-        if (player.pad.y > nby && this.ball.vy < 0) {
+        if (player.pad.y > nby) {
             player.pad.ay = -PPConstants.PAD_DEF_ACC;
             player.pad.stop = false;
-        } else if (player.pad.y < nby && this.ball.vy > 0) {
+        } else if (player.pad.y < nby) {
             player.pad.ay = PPConstants.PAD_DEF_ACC;
             player.pad.stop = false;
         } else {
