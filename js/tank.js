@@ -25,6 +25,7 @@ const PPConstants = {
     C_TANK_TIP: '#ff0000',
     C_TREE_TRUNK: '#b2781a',
     C_TREE_LEAF: '#1cb621',
+    C_TREE_LEAF2: '#047800',
     C_LAKE_WATER: '#3fe3e8',
 
     GAME_STATUS_READY: 0,
@@ -55,6 +56,23 @@ let Tree = function (x = 0, y = 0) {
     for (var i = 0; i < 40; i++) {
         leaf = new Games2D.Block(x + (18 * Math.random() * ((Math.random() > 0.5) ? 1 : -1)), y - 6 - (18 * Math.random()), 6, 6);
         leaf.fc = PPConstants.C_TREE_LEAF;
+        leaf.sc = PPConstants.C_BLACK
+        leaves.push(leaf);
+    }
+    leaves.unshift(trunk)
+    let shape = new Games2D.Shape(0, 0, leaves);
+    return shape;
+}
+
+let Tree2 = function (x = 0, y = 0) {
+    let trunk = new Games2D.Block(x, y, 5, 15);
+    trunk.fc = PPConstants.C_TREE_TRUNK;
+    trunk.sc = PPConstants.C_BLACK;
+    let leaf;
+    let leaves = [];
+    for (var i = 0; i < 40; i++) {
+        leaf = new Games2D.Block(x + (12 * Math.random() * ((Math.random() > 0.5) ? 1 : -1)), y - 6 - (28 * Math.random()), 4, 10);
+        leaf.fc = PPConstants.C_TREE_LEAF2;
         leaf.sc = PPConstants.C_BLACK
         leaves.push(leaf);
     }
@@ -166,9 +184,11 @@ let TankGame = function () {
 
     this._generateMap = function () {
         let trees = [];
-        for (var i = 0; i < 60; i++) {
+        for (var i = 0; i < 40; i++) {
             var tree = new Tree(PPConstants.FIELD_WIDTH * Math.random(), PPConstants.FIELD_HEIGHT * Math.random())
+            var tree2 = new Tree2(PPConstants.FIELD_WIDTH * Math.random(), PPConstants.FIELD_HEIGHT * Math.random())
             trees.push(tree);
+            trees.push(tree2);
         }
 
         let lakes = [new Lake(PPConstants.FIELD_WIDTH * Math.random(), PPConstants.FIELD_HEIGHT * Math.random()),
