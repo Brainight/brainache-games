@@ -73,12 +73,26 @@ const Games2D = {
         return go;
     },
 
-    Shape: function (x, y, blocks = [], ellipses = [], shapes = []) {
+    Text : function(content, x, y, font='monospace 14px', fc= '#ffffff', sc = '#000000'){
+        let go = new Games2D._GameObject(x, y);
+        go.type = 't';
+        go.content = content;
+        go.font = font;
+        go.fc = fc;
+        go.sc = sc;
+    },
+
+    VertexShape : function(vertex = []){
+        
+    },
+
+    Shape: function (x, y, blocks = [], ellipses = [], shapes = [], texts = []) {
         let go = new Games2D._GameObject(x, y);
         go.type = 's'
         go.blocks = blocks;
         go.ellipses = ellipses;
         go.shapes = shapes;
+        go.text = 
 
         go._updateObject = function (o, time) {
             o.vx = this.vx;
@@ -108,6 +122,11 @@ const Games2D = {
         return go;
     },
 
+    Layer: function (name = 'Layer') {
+        this.name = name;
+        this.matrixes = { i: new Games2D.GraphicsData() }
+    },
+
     PPGraphics: function (canvas, size = { w: 540, h: 540 }) {
 
         this.drawPoints = false;
@@ -115,9 +134,7 @@ const Games2D = {
         this.canvas.width = size.w;
         this.canvas.height = size.h;
         this._ctx = this.canvas.getContext('2d');
-        this.gsdMap = {
-            i: new Games2D.GraphicsData()
-        };
+        this.gsdMap = [new Games2D.Layer('Layer 0')];
 
         this.setCanvasSize = function (w, h) {
             this.canvas.width = w;
@@ -128,37 +145,37 @@ const Games2D = {
             this._ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
 
-            for (var gsdkey in this.gsdMap) {
-                var gsd = this.gsdMap[gsdkey];
-                if (gsd.matrix !== undefined && gsd.matrix instanceof DOMMatrix || gsd.matrix instanceof DOMMatrixReadOnly) {
-                    this._ctx.setTransform(gsd.matrix);
-                }
+            for (var layer of this.gsdMap) {
+                for (var gsdkey in layer.matrixes) {
+                    var gsd = layer.matrixes[gsdkey];
+                    if (gsd.matrix !== undefined && gsd.matrix instanceof DOMMatrix || gsd.matrix instanceof DOMMatrixReadOnly) {
+                        this._ctx.setTransform(gsd.matrix);
+                    }
 
-                // Draw objects
-                let blocks = gsd.blocks !== undefined ? gsd.blocks : [];
-                let ellipses = gsd.ellipses !== undefined ? gsd.ellipses : [];
-                let images = gsd.images !== undefined ? gsd.images : [];
-                let shapes = gsd.shapes !== undefined ? gsd.shapes : [];
+                    // Draw objects
+                    let blocks = gsd.blocks !== undefined ? gsd.blocks : [];
+                    let ellipses = gsd.ellipses !== undefined ? gsd.ellipses : [];
+                    let images = gsd.images !== undefined ? gsd.images : [];
+                    let shapes = gsd.shapes !== undefined ? gsd.shapes : [];
 
-                for (var s of shapes) {
-                    this._drawShape(s);
-                }
+                    for (var s of shapes) {
+                        this._drawShape(s);
+                    }
 
-                for (var block of blocks) {
-                    this._drawBlock(block);
-                }
+                    for (var block of blocks) {
+                        this._drawBlock(block);
+                    }
 
-                for (var ellipse of ellipses) {
-                    this._drawEllipse(ellipse);
-                }
+                    for (var ellipse of ellipses) {
+                        this._drawEllipse(ellipse);
+                    }
 
-                for (var img of images) {
-                    this._drawImage(img);
+                    for (var img of images) {
+                        this._drawImage(img);
+                    }
+                    this._ctx.resetTransform();
                 }
-                this._ctx.resetTransform();
             }
-
-
         }
 
         this._drawShape = function (shape) {
@@ -228,7 +245,7 @@ const Games2D = {
                 this._ctx.translate(ellipse.x - ellipse.ox, ellipse.y - ellipse.oy);
             } else {
                 x = bx
-                y = by 
+                y = by
             }
             this._ctx.rotate(r);
 
@@ -244,6 +261,7 @@ const Games2D = {
                 this._ctx.ellipse(x, y, 2, 2, 0, 0, Math.PI * 2);
                 this._ctx.fill();
             }
+            this._ctx.restore();
         }
 
         this._drawImage = function (image) {
@@ -252,14 +270,15 @@ const Games2D = {
 
         this._printText = function (text) {
             his._ctx.fillStyle = text.fc;
+            his._ctx.fillStyle = text.sc;
             this._ctx.font = text.font;
             let size = this._ctx.measureText(text.content);
             this._ctx.fillText(text, this.text.x - size.width / 2, this.text.y);
         }
 
-        this.getUntransformedPoint = function (matrixid, x, y) {
+        this.getUntransformedPoint = function (matrix, x, y) {
             let m = this._ctx.getTransform();
-            return { x: x / this.gsdMap[matrixid].matrix.a, y: y / this.gsdMap[matrixid].matrix.d }
+            return { x: x / matrix.a, y: y / matrix.d }
         }
     }
 }

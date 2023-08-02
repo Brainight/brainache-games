@@ -22,6 +22,7 @@ const PPConstants = {
     C_BLACK: "#000000",
     C_GREEN_FIELD: "#3e9935",
     C_TANK_GRAY: '#9d878d',
+    C_TANK_GRAY2: '#3e3938',
     C_TANK_TIP: '#ff0000',
     C_TREE_TRUNK: '#b2781a',
     C_TREE_LEAF: '#1cb621',
@@ -82,14 +83,14 @@ let Tree2 = function (x = 0, y = 0) {
 }
 
 let Lake = function (x = 0, y = 0) {
-    let lake = new Games2D.Ellipse(x, y, 200 * Math.random(), 200 * Math.random());
+    let lake = new Games2D.Ellipse(x, y, 100 * Math.random() + 50, 100 * Math.random() + 50);
     lake.fc = PPConstants.C_LAKE_WATER;
     lake.sc = PPConstants.C_BLACK;
     return lake;
 }
 
 let Tank = function () {
-    let body = new Games2D.Block(PPConstants.FIELD_WIDTH / 2, PPConstants.FIELD_HEIGHT / 2, 40, 30);
+    let body = new Games2D.Block(PPConstants.FIELD_WIDTH / 2, PPConstants.FIELD_HEIGHT / 2, 60, 34);
     body.fc = PPConstants.C_TANK_GRAY
     body.sc = PPConstants.C_BLACK;
     let barrel = new Games2D.Block(PPConstants.FIELD_WIDTH / 2 + 20, PPConstants.FIELD_HEIGHT / 2, 40, 10);
@@ -98,7 +99,16 @@ let Tank = function () {
     let barrelEnd = new Games2D.Block(PPConstants.FIELD_WIDTH / 2 + 30, PPConstants.FIELD_HEIGHT / 2, 5, 10)
     barrelEnd.fc = PPConstants.C_TANK_TIP
     barrelEnd.sc = PPConstants.C_BLACK;
-    let shape = new Games2D.Shape(PPConstants.FIELD_WIDTH / 2, PPConstants.FIELD_HEIGHT / 2, [body, barrel, barrelEnd]);
+    let wheell = new Games2D.Block(PPConstants.FIELD_WIDTH / 2, PPConstants.FIELD_HEIGHT / 2 + 20, 64, 10);
+    wheell.fc = PPConstants.C_TANK_GRAY2;
+    wheell.sc = PPConstants.C_BLACK;
+    let wheelr = new Games2D.Block(PPConstants.FIELD_WIDTH / 2, PPConstants.FIELD_HEIGHT / 2 - 20, 64, 10);
+    wheelr.fc = PPConstants.C_TANK_GRAY2
+    wheelr.sc = PPConstants.C_BLACK;
+    let entry = new Games2D.Ellipse(PPConstants.FIELD_WIDTH / 2, PPConstants.FIELD_HEIGHT / 2, 12, 12);
+    entry.fc = PPConstants.C_TANK_GRAY2
+    entry.sc = PPConstants.C_BLACK;
+    let shape = new Games2D.Shape(PPConstants.FIELD_WIDTH / 2, PPConstants.FIELD_HEIGHT / 2, [wheell, wheelr, body, barrel, barrelEnd], [entry]);
     return shape;
 }
 
@@ -172,9 +182,13 @@ let TankGame = function () {
         let dy = h / PPConstants.FIELD_HEIGHT;
         this.gs.setCanvasSize(w, h);
         let tscMatrix = new DOMMatrixReadOnly([dx, 0, 0, dy, dx, dy]).translate(PPConstants.FIELD_WIDTH / 2, PPConstants.FIELD_HEIGHT / 2);
-        this.gs.gsdMap.scaled = new Games2D.GraphicsData(new DOMMatrixReadOnly([dx, 0, 0, dy, dx, dy]));
-        this.gs.gsdMap.tank = new Games2D.GraphicsData(tscMatrix);
-
+        this.gs.gsdMap[0].matrixes.scaled = new Games2D.GraphicsData(new DOMMatrixReadOnly([dx, 0, 0, dy, dx, dy]));
+        this.gs.gsdMap[1] = new Games2D.Layer('Layer 1');
+        this.gs.gsdMap[1].matrixes.scaled = new Games2D.GraphicsData(new DOMMatrixReadOnly([dx, 0, 0, dy, dx, dy]));
+        this.gs.gsdMap[1].matrixes.tank = new Games2D.GraphicsData(tscMatrix);
+        this.gs.gsdMap[2] = new Games2D.Layer('Layer 2');
+        this.gs.gsdMap[2].matrixes.scaled = new Games2D.GraphicsData(new DOMMatrixReadOnly([dx, 0, 0, dy, dx, dy]));
+        this.gs.gsdMap[2].matrixes.tank = new Games2D.GraphicsData(tscMatrix);
         this.player = new Player();
         this.timer = new Timer();
         this.objects.tank = this.player.o;
@@ -185,8 +199,14 @@ let TankGame = function () {
     this._generateMap = function () {
         let trees = [];
         for (var i = 0; i < 40; i++) {
-            var tree = new Tree(PPConstants.FIELD_WIDTH * Math.random(), PPConstants.FIELD_HEIGHT * Math.random())
-            var tree2 = new Tree2(PPConstants.FIELD_WIDTH * Math.random(), PPConstants.FIELD_HEIGHT * Math.random())
+            var d0 = (Math.random() > 0.5)
+            var d1 = (Math.random() > 0.5)
+            var x = PPConstants.FIELD_WIDTH / 2 + ((d0 ? PPConstants.FIELD_WIDTH / 2 * Math.random() + 50 : -PPConstants.FIELD_WIDTH / 2 * Math.random() - 50));
+            var y = PPConstants.FIELD_HEIGHT / 2 + ((d1 ? PPConstants.FIELD_HEIGHT / 2 * Math.random() + 50 : -PPConstants.FIELD_HEIGHT / 2 * Math.random() - 50));
+            var tree = new Tree(x, y)
+            x = PPConstants.FIELD_WIDTH / 2 + ((d0 ? PPConstants.FIELD_WIDTH / 2 * Math.random() + 50 : -PPConstants.FIELD_WIDTH / 2 * Math.random() - 50));
+            y = PPConstants.FIELD_HEIGHT / 2 + ((d1 ? PPConstants.FIELD_HEIGHT / 2 * Math.random() + 50 : -PPConstants.FIELD_HEIGHT / 2 * Math.random() - 50));
+            var tree2 = new Tree2(x, y)
             trees.push(tree);
             trees.push(tree2);
         }
@@ -195,7 +215,7 @@ let TankGame = function () {
         new Lake(PPConstants.FIELD_WIDTH * Math.random(), PPConstants.FIELD_HEIGHT * Math.random())]
 
         this.map.trees = trees;
-        this.map.lakes = lakes;
+        //this.map.lakes = lakes;
     }
 
     this._update = function (time) {
@@ -203,25 +223,31 @@ let TankGame = function () {
         for (var o in this.objects) {
             let objs = this.objects[o];
             if (Array.isArray(objs)) {
-                for (var obj of objs) {
-                    obj.update(time);
+                for (var i = objs.length - 1; i >= 0; i--) {
+                    objs[i].update(time);
+                    if (this._isOutOfMap(objs[i])) {
+                        objs.splice(i, 1);
+                    }
                 }
             } else {
                 objs.update(time);
             }
         }
+    },
 
-    }
+        this._isOutOfMap = function (gameobject) {
+            return gameobject.x < 0 || gameobject.x > PPConstants.FIELD_WIDTH || gameobject.y < 0 || gameobject.y > PPConstants.FIELD_HEIGHT;
+        },
 
-    this._updatePlayer = function (time) { // Time is in s
-        var p = this.gs.getUntransformedPoint('scaled', this.mousePosition.x, this.mousePosition.y);
-        let dx = this.player.o.x - p.x;
-        let dy = this.player.o.y - p.y;
-        this.player.o.rotation = Math.atan2(dy, dx);
-        if (this.player.shoot(time)) {
-            this.createBullet();
+        this._updatePlayer = function (time) { // Time is in s
+            var p = this.gs.getUntransformedPoint(this.gs.gsdMap[0].matrixes.scaled.matrix, this.mousePosition.x, this.mousePosition.y);
+            let dx = this.player.o.x - p.x;
+            let dy = this.player.o.y - p.y;
+            this.player.o.rotation = Math.atan2(dy, dx);
+            if (this.player.shoot(time)) {
+                this.createBullet();
+            }
         }
-    }
 
     this.createBullet = function () {
         this._createBullet();
@@ -249,11 +275,11 @@ let TankGame = function () {
     }
 
     this._createBullet = function (dvx = 0, dvy = 0) {
-        let x = this.player.o.x;
-        let y = this.player.o.y;
+        let x = this.player.o.blocks[4].x;
+        let y = this.player.o.blocks[4].y;
         let b = new Games2D.Block(x, y, this.player.gun.stats.w, this.player.gun.stats.h);
-        b.ox = x;
-        b.oy = y;
+        b.ox = this.player.o.blocks[4].x;
+        b.oy = this.player.o.blocks[4].y;
         b.type = this.player.gun.stats.name;
         b.rotation = this.player.o.rotation;
         b.vx = this.player.gun.stats.v * Math.cos(this.player.o.rotation);
@@ -314,10 +340,10 @@ let TankGame = function () {
     }
 
     this._draw = function () {
-        this.gs.gsdMap.tank.shapes = [this.objects.tank];
-        this.gs.gsdMap.tank.blocks = this.objects.bullets;
-        this.gs.gsdMap.scaled.shapes = this.map.trees;
-        this.gs.gsdMap.scaled.ellipses = this.map.lakes;
+        this.gs.gsdMap[2].matrixes.tank.shapes = [this.objects.tank];
+        this.gs.gsdMap[1].matrixes.tank.blocks = this.objects.bullets;
+        this.gs.gsdMap[0].matrixes.scaled.shapes = this.map.trees;
+        this.gs.gsdMap[0].matrixes.scaled.ellipses = this.map.lakes;
         this.gs.drawFrame()
     }
 
