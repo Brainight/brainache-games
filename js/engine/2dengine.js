@@ -73,7 +73,7 @@ const Games2D = {
         return go;
     },
 
-    Text : function(content, x, y, font='monospace 14px', fc= '#ffffff', sc = '#000000'){
+    Text: function (content, x, y, font = 'monospace 14px', fc = '#ffffff', sc = '#000000') {
         let go = new Games2D._GameObject(x, y);
         go.type = 't';
         go.content = content;
@@ -82,8 +82,8 @@ const Games2D = {
         go.sc = sc;
     },
 
-    VertexShape : function(vertex = []){
-        
+    VertexShape: function (vertex = []) {
+
     },
 
     Shape: function (x, y, blocks = [], ellipses = [], shapes = [], texts = []) {
@@ -92,7 +92,7 @@ const Games2D = {
         go.blocks = blocks;
         go.ellipses = ellipses;
         go.shapes = shapes;
-        go.text = 
+        go.texts = texts;
 
         go._updateObject = function (o, time) {
             o.vx = this.vx;
@@ -116,6 +116,9 @@ const Games2D = {
                 this._updateObject(o, time);
             }
             for (var s of this.shapes) {
+                s.update(time);
+            }
+            for (var s of this.texts) {
                 s.update(time);
             }
         }
@@ -157,6 +160,7 @@ const Games2D = {
                     let ellipses = gsd.ellipses !== undefined ? gsd.ellipses : [];
                     let images = gsd.images !== undefined ? gsd.images : [];
                     let shapes = gsd.shapes !== undefined ? gsd.shapes : [];
+                    let texts = gsd.texts !== undefined ? gsd.texts : [];
 
                     for (var s of shapes) {
                         this._drawShape(s);
@@ -173,6 +177,10 @@ const Games2D = {
                     for (var img of images) {
                         this._drawImage(img);
                     }
+
+                    for (var text of texts) {
+                        this._printText(text);
+                    }
                     this._ctx.resetTransform();
                 }
             }
@@ -182,6 +190,7 @@ const Games2D = {
             let blocks = shape.blocks !== undefined ? shape.blocks : [];
             let ellipses = shape.ellipses !== undefined ? shape.ellipses : [];
             let arcs = shape.arcs !== undefined ? shape.arcs : [];
+            let texts = shape.texts !== undefined ? shape.texts : [];
 
             for (var b of blocks) {
                 this._drawBlock(b, shape);
@@ -191,6 +200,9 @@ const Games2D = {
             }
             for (var a of arcs) {
                 this._drawArc(a, shape);
+            }
+            for (var text of texts) {
+                this._printText(text, shape);
             }
         }
 
@@ -268,7 +280,7 @@ const Games2D = {
 
         }
 
-        this._printText = function (text) {
+        this._printText = function (text, parentShape) {
             his._ctx.fillStyle = text.fc;
             his._ctx.fillStyle = text.sc;
             this._ctx.font = text.font;

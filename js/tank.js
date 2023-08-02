@@ -112,6 +112,10 @@ let Tank = function () {
     return shape;
 }
 
+let PlayerInfoBlock = function(){
+
+}
+
 let Gun = function (stats = PPConstants.PGUN_LASER) {
     this.stats = stats;
     this._lastFired = 1000;
@@ -132,6 +136,9 @@ let Player = function () {
     this.gun = new Gun();
     this.points = 0;
     this.life = 100;
+    this.arsenal = {
+        
+    }
     this.gun.chambered = false;
     this.shoot = function (time) { // Returns true if shoot / false if player is not shooting or firerated > lastFired.
         let s = (this.shooting || this.gun.chambered) && this.gun.fire(time);
